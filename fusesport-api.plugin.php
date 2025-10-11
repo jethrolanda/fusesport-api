@@ -20,6 +20,7 @@ class WP_Plugin_Boilerplate
 	public $ajax;
 	public $shortcode;
 	public $rest;
+	public $fusesport;
 
 	const VERSION = '1.0';
 
@@ -42,6 +43,8 @@ class WP_Plugin_Boilerplate
 		$this->ajax = FSA\Plugin\Ajax::instance();
 		$this->shortcode = FSA\Plugin\Shortcode::instance();
 		$this->rest = FSA\Plugin\Rest::instance();
+		$this->fusesport = FSA\Plugin\Fusesport::instance();
+
 
 		// Register Activation Hook
 		register_activation_hook(FSA_PLUGIN_DIR . 'wp-plugin-boilerplate.php', array($this, 'activate'));

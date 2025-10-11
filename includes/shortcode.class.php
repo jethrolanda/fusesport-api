@@ -21,9 +21,7 @@ class Shortcode
    */
   public function __construct()
   {
-    add_shortcode('wppb_map', array($this, 'wpdocs_bartag_func'));
-    add_shortcode('wppb_form', array($this, 'hubspot_form'));
-    add_shortcode('wppb_zipcode', array($this, 'zipcode'));
+    add_shortcode('fsa_map', array($this, 'wpdocs_bartag_func'));
   }
 
   /**
@@ -48,38 +46,7 @@ class Shortcode
 
     ob_start();
 
-
-    // echo '<iframe
-    //         width="600"
-    //         height="450"
-    //         style="border:0"
-    //         loading="lazy"
-    //         allowfullscreen
-    //         referrerpolicy="no-referrer-when-downgrade"
-    //         src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBwHHnwIFReFPErGaAagIu881jQPRMFS8w
-    //           &q=Space+Needle,Seattle+WA">
-    //       </iframe>';
-    return ob_get_clean();
-  }
-
-  function hubspot_form($atts)
-  {
-    $atts = shortcode_atts(array(
-      'foo' => 'no foo',
-      'baz' => 'default baz'
-    ), $atts, 'bartag');
-
-    ob_start();
-
-    echo 'asdasd';
-    return ob_get_clean();
-  }
-
-  function zipcode($atts)
-  {
-    ob_start();
-
-    echo '<span data-wp-interactive="service-area" data-wp-text="state.urlZipcode"></span>';
+    // content
     return ob_get_clean();
   }
 }
