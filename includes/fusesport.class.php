@@ -42,20 +42,23 @@ class Fusesport
 
   public function request()
   {
+
+    $options = get_option('fusesport_options');
     $url = 'https://rugbyresults.fusesport.com/api/oauth2/token';
+    $username = $options['fusesport_field_api_username'];
+    $password = $options['fusesport_field_api_password'];
+    $auth = base64_encode("$username:$password");
 
     $body = [
       'grant-type' => 'client_credentials',
-      'client_id' => '79FFD7AC-CB2A-44CA-B0D9-9A82CDD3D427',
-      'client_secret' => 'LoJeZCfOuokbOMNNmJya9D19DrYb0pnM',
     ];
 
-    $response = wp_remote_post($url, [
-      'headers' => [
-        'Content-Type' => 'application/x-www-form-urlencoded',
-      ],
+    $response = wp_remote_post($url, array(
+      'headers' => array(
+        'Authorization' => 'Basic ' . $auth,
+      ),
       'body' => $body, // note: NOT json encoded, since it's form data
-    ]);
+    ));
 
     if (!is_wp_error($response)) {
       $data = json_decode(wp_remote_retrieve_body($response), true);

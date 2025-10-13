@@ -21,6 +21,7 @@ class WP_Plugin_Boilerplate
 	public $shortcode;
 	public $rest;
 	public $fusesport;
+	public $settings;
 
 	const VERSION = '1.0';
 
@@ -44,6 +45,7 @@ class WP_Plugin_Boilerplate
 		$this->shortcode = FSA\Plugin\Shortcode::instance();
 		$this->rest = FSA\Plugin\Rest::instance();
 		$this->fusesport = FSA\Plugin\Fusesport::instance();
+		$this->settings = FSA\Plugin\Settings::instance();
 
 
 		// Register Activation Hook
