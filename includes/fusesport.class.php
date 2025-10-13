@@ -51,9 +51,9 @@ class Fusesport
       $password = $options['fusesport_field_api_password'];
       $auth = base64_encode("$username:$password");
 
-      $body = [
+      $body = array(
         'grant-type' => 'client_credentials',
-      ];
+      );
 
       $response = wp_remote_post($url, array(
         'headers' => array(
@@ -64,7 +64,7 @@ class Fusesport
 
       if (!is_wp_error($response)) {
         $data = json_decode(wp_remote_retrieve_body($response), true);
-        error_log(print_r($data, true));
+
         return array(
           'status' => 'success',
           'token' => $data['token'],
