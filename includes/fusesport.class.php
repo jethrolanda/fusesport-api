@@ -95,12 +95,12 @@ class Fusesport
       $url = 'https://rugbyresults.fusesport.com/api/rugby/main_detail/1313';
       $token = $requested_token['token'];
 
-      $response = wp_remote_get($url, [
-        'headers' => [
+      $response = wp_remote_get($url, array(
+        'headers' => array(
           'Authorization' => 'Bearer ' . $token,
           'Accept'        => 'application/json',
-        ],
-      ]);
+        ),
+      ));
 
       if (is_wp_error($response)) {
         wp_send_json(array(
