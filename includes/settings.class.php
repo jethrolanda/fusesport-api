@@ -32,7 +32,6 @@ class Settings
      */
     add_action('admin_init', array($this, 'settings_init'));
 
-
     /**
      * Register our register_options_page to the admin_menu action hook.
      */
@@ -133,7 +132,7 @@ class Settings
   {
     add_menu_page(
       'FuseSport Settings',
-      'Fuse Sport',
+      'FuseSport',
       'manage_options',
       'fusesport',
       array($this, 'options_page')
@@ -176,6 +175,8 @@ class Settings
         ?>
       </form>
     </div>
+
+    <div id="fusesport"></div>
 <?php
   }
 }

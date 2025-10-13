@@ -16,10 +16,11 @@ defined('ABSPATH') || exit;
 
 // Path Constants ======================================================================================================
 
-define('FSA_PLUGIN_URL',             plugins_url() . '/fusespot-api/');
+define('FSA_PLUGIN_URL',             plugins_url() . '/fusesport-api/');
 define('FSA_PLUGIN_DIR',             plugin_dir_path(__FILE__));
 define('FSA_CSS_ROOT_URL',           FSA_PLUGIN_URL . 'css/');
 define('FSA_JS_ROOT_URL',            FSA_PLUGIN_URL . 'js/');
+define('FSA_JS_ROOT_DIR',            FSA_PLUGIN_DIR . 'js/');
 define('FSA_TEMPLATES_ROOT_URL',     FSA_PLUGIN_URL . 'templates/');
 define('FSA_TEMPLATES_ROOT_DIR',     FSA_PLUGIN_DIR . 'templates/');
 define('FSA_BLOCKS_ROOT_URL',        FSA_PLUGIN_URL . 'blocks/');
@@ -29,7 +30,7 @@ define('FSA_BLOCKS_ROOT_DIR',        FSA_PLUGIN_DIR . 'blocks/');
 require_once 'inc/autoloader.php';
 
 // Require settings
-require_once "settings/my-first-gutenberg-app.php";
+// require_once "settings/my-first-gutenberg-app.php";
 
 // Run
 require_once 'fusesport-api.plugin.php';

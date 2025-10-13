@@ -56,14 +56,22 @@ class Scripts
    */
   public function backend_script_loader()
   {
+    $asset_file = FSA_JS_ROOT_DIR . 'fusesport/build/index.asset.php';
 
-    wp_localize_script(
-      'fuel-logic-service-area-fuel-logic-service-area-editor-script-js',
-      'wppb',
-      array(
-        'test'
-      )
-    );
+    if (file_exists($asset_file) && isset($_GET['page']) && $_GET['page'] == "fusesport") {
+      $asset = include $asset_file;
+      error_log(print_r($asset, true));
+      wp_enqueue_script('fusesport-js', FSA_JS_ROOT_URL . 'fusesport/build/index.js', $asset['dependencies'], $asset['version'], true);
+      wp_localize_script('fusesport-js', 'fusesport_params', array(
+        'rest_url'   => esc_url_raw(get_rest_url()),
+        'nonce' => wp_create_nonce('wp_rest'),
+        'ajax_url' => admin_url('admin-ajax.php'),
+      ));
+      wp_enqueue_style('fusesport-css', FSA_JS_ROOT_URL . 'fusesport/build/style-index.css');
+
+      wp_enqueue_style('fusesport-css');
+      wp_enqueue_script('fusesport-js');
+    }
   }
 
   /**
