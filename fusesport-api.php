@@ -34,4 +34,4 @@ require_once 'inc/autoloader.php';
 
 // Run
 require_once 'fusesport-api.plugin.php';
-$GLOBALS['wppb'] = new WP_Plugin_Boilerplate();
+$GLOBALS['fsa'] = new FuseSport_API();

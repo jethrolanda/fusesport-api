@@ -85,6 +85,8 @@ class Fusesport
 
   public function request_data()
   {
+    global $fsa;
+
     $requested_token = $this->request_token();
     if ($requested_token['status'] === 'success') {
 
@@ -92,7 +94,7 @@ class Fusesport
       // 1313 is the season_id for the whole 2025 Premiership Rugby season.
       // It’s recommended to filter the results by adding ?competitionID=1688636 for Chikarovski Cup or ?competitionID=1688637 for Women's Div 2
 
-      $url = 'https://rugbyresults.fusesport.com/api/rugby/main_detail/1313';
+      $url = 'https://rugbyresults.fusesport.com/api/rugby/main_detail/1313?competitionID=1688636';
       $token = $requested_token['token'];
 
       $response = wp_remote_get($url, array(
@@ -108,8 +110,10 @@ class Fusesport
           'message' => $response->get_error_message(),
         ));
       } else {
+
         $body = wp_remote_retrieve_body($response);
         $data = json_decode($body, true);
+        $fsa->sportspress->createEvents($data);
         wp_send_json(array(
           'status' => 'success',
           'data' => $data,

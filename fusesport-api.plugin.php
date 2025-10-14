@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 // Exit if accessed directly
 
 
-class WP_Plugin_Boilerplate
+class FuseSport_API
 {
 
 	/*
@@ -22,6 +22,7 @@ class WP_Plugin_Boilerplate
 	public $rest;
 	public $fusesport;
 	public $settings;
+	public $sportspress;
 
 	const VERSION = '1.0';
 
@@ -46,6 +47,7 @@ class WP_Plugin_Boilerplate
 		$this->rest = FSA\Plugin\Rest::instance();
 		$this->fusesport = FSA\Plugin\Fusesport::instance();
 		$this->settings = FSA\Plugin\Settings::instance();
+		$this->sportspress = \FSA\Plugin\Sportspress::instance();
 
 
 		// Register Activation Hook
