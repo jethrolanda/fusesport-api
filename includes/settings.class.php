@@ -93,14 +93,14 @@ class Settings
     );
 
     add_settings_field(
-      'sportspess_field_api_username',
+      'sportspress_field_api_username',
       // Use $args' label_for to populate the id inside the callback.
       __('SportsPress API Username', 'fusesport'),
       array($this, 'sportspress_field_api_username_cb'),
       'fusesport',
       'fusesport_section_developers',
       array(
-        'label_for'         => 'sportspess_field_api_username',
+        'label_for'         => 'sportspress_field_api_username',
         'class'             => 'fusesport_row',
       )
     );
@@ -113,6 +113,31 @@ class Settings
       'fusesport_section_developers',
       array(
         'label_for'         => 'sportspress_field_api_password',
+        'class'             => 'fusesport_row',
+      )
+    );
+    add_settings_field(
+      'fusesport_field_season_id', // As of WP 4.6 this value is used only internally.
+      // Use $args' label_for to populate the id inside the callback.
+      __('FuseSport Season ID', 'fusesport'),
+      array($this, 'fusesport_season_id_cb'),
+      'fusesport',
+      'fusesport_section_developers',
+      array(
+        'label_for'         => 'fusesport_field_season_id',
+        'class'             => 'fusesport_row',
+      )
+    );
+
+    add_settings_field(
+      'fusesport_field_competition_ids', // As of WP 4.6 this value is used only internally.
+      // Use $args' label_for to populate the id inside the callback.
+      __('FuseSport Competition IDs', 'fusesport'),
+      array($this, 'fusesport_competition_ids_cb'),
+      'fusesport',
+      'fusesport_section_developers',
+      array(
+        'label_for'         => 'fusesport_field_competition_ids',
         'class'             => 'fusesport_row',
       )
     );
@@ -135,7 +160,7 @@ class Settings
     // Get the value of the setting we've registered with register_setting()
     $options = get_option('fusesport_options'); ?>
     <input style="width: 400px" type="text" placeholder="Username" id="<?php echo esc_attr($args['label_for']); ?>" name="fusesport_options[<?php echo esc_attr($args['label_for']); ?>]" value="<?php echo isset($options[$args['label_for']]) ? esc_attr($options[$args['label_for']]) : ''; ?>" />
-
+    <p>Fusesport API username.</p>
   <?php
   }
 
@@ -145,7 +170,7 @@ class Settings
     $options = get_option('fusesport_options');
   ?>
     <input style="width: 400px" type="password" placeholder="Password" id="<?php echo esc_attr($args['label_for']); ?>" name="fusesport_options[<?php echo esc_attr($args['label_for']); ?>]" value="<?php echo isset($options[$args['label_for']]) ? esc_attr($options[$args['label_for']]) : ''; ?>" />
-
+    <p>Fusesport API password.</p>
   <?php
   }
 
@@ -154,7 +179,7 @@ class Settings
     // Get the value of the setting we've registered with register_setting()
     $options = get_option('fusesport_options'); ?>
     <input style="width: 400px" type="text" placeholder="Username" id="<?php echo esc_attr($args['label_for']); ?>" name="fusesport_options[<?php echo esc_attr($args['label_for']); ?>]" value="<?php echo isset($options[$args['label_for']]) ? esc_attr($options[$args['label_for']]) : ''; ?>" />
-    <p>Add your username here. Sportspress API requires username and app password to do an API request. The API will use basic authentication (WordPress username + application password).</p>
+    <p>Add your wordpress username here. Sportspress API requires username and app password to do an API request. The API will use basic authentication (WordPress username + application password).</p>
 
   <?php
   }
@@ -169,6 +194,25 @@ class Settings
   <?php
   }
 
+  public function fusesport_season_id_cb($args)
+  {
+    // Get the value of the setting we've registered with register_setting()
+    $options = get_option('fusesport_options');
+  ?>
+    <input style="width: 400px" type="text" placeholder="Season ID" id="<?php echo esc_attr($args['label_for']); ?>" name="fusesport_options[<?php echo esc_attr($args['label_for']); ?>]" value="<?php echo isset($options[$args['label_for']]) ? esc_attr($options[$args['label_for']]) : ''; ?>" />
+    <p>Add fusesport season ID here.</p>
+  <?php
+  }
+
+  public function fusesport_competition_ids_cb($args)
+  {
+    // Get the value of the setting we've registered with register_setting()
+    $options = get_option('fusesport_options');
+  ?>
+    <input style="width: 400px" type="text" placeholder="Competition IDs" id="<?php echo esc_attr($args['label_for']); ?>" name="fusesport_options[<?php echo esc_attr($args['label_for']); ?>]" value="<?php echo isset($options[$args['label_for']]) ? esc_attr($options[$args['label_for']]) : ''; ?>" />
+    <p>Add fusesport competition ID's here. Separate by comma.</p>
+  <?php
+  }
 
   /**
    * Add the top level menu page.
