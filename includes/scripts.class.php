@@ -60,7 +60,6 @@ class Scripts
 
     if (file_exists($asset_file) && isset($_GET['page']) && $_GET['page'] == "fusesport") {
       $asset = include $asset_file;
-      error_log(print_r($asset, true));
       wp_enqueue_script('fusesport-js', FSA_JS_ROOT_URL . 'fusesport/build/index.js', $asset['dependencies'], $asset['version'], true);
       wp_localize_script('fusesport-js', 'fusesport_params', array(
         'rest_url'   => esc_url_raw(get_rest_url()),

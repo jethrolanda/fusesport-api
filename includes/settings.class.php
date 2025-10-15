@@ -76,7 +76,7 @@ class Settings
       'fusesport_section_developers',
       array(
         'label_for'         => 'fusesport_field_api_username',
-        'class'             => 'warroom_row',
+        'class'             => 'fusesport_row',
       )
     );
     add_settings_field(
@@ -88,7 +88,32 @@ class Settings
       'fusesport_section_developers',
       array(
         'label_for'         => 'fusesport_field_api_password',
-        'class'             => 'warroom_row',
+        'class'             => 'fusesport_row',
+      )
+    );
+
+    add_settings_field(
+      'sportspess_field_api_username',
+      // Use $args' label_for to populate the id inside the callback.
+      __('SportsPress API Username', 'fusesport'),
+      array($this, 'sportspress_field_api_username_cb'),
+      'fusesport',
+      'fusesport_section_developers',
+      array(
+        'label_for'         => 'sportspess_field_api_username',
+        'class'             => 'fusesport_row',
+      )
+    );
+    add_settings_field(
+      'sportspress_field_api_password', // As of WP 4.6 this value is used only internally.
+      // Use $args' label_for to populate the id inside the callback.
+      __('SportsPress API Password', 'fusesport'),
+      array($this, 'sportspress_field_api_password_cb'),
+      'fusesport',
+      'fusesport_section_developers',
+      array(
+        'label_for'         => 'sportspress_field_api_password',
+        'class'             => 'fusesport_row',
       )
     );
   }
@@ -121,6 +146,26 @@ class Settings
   ?>
     <input style="width: 400px" type="password" placeholder="Password" id="<?php echo esc_attr($args['label_for']); ?>" name="fusesport_options[<?php echo esc_attr($args['label_for']); ?>]" value="<?php echo isset($options[$args['label_for']]) ? esc_attr($options[$args['label_for']]) : ''; ?>" />
 
+  <?php
+  }
+
+  public function sportspress_field_api_username_cb($args)
+  {
+    // Get the value of the setting we've registered with register_setting()
+    $options = get_option('fusesport_options'); ?>
+    <input style="width: 400px" type="text" placeholder="Username" id="<?php echo esc_attr($args['label_for']); ?>" name="fusesport_options[<?php echo esc_attr($args['label_for']); ?>]" value="<?php echo isset($options[$args['label_for']]) ? esc_attr($options[$args['label_for']]) : ''; ?>" />
+    <p>Add your username here. Sportspress API requires username and app password to do an API request. The API will use basic authentication (WordPress username + application password).</p>
+
+  <?php
+  }
+
+  public function sportspress_field_api_password_cb($args)
+  {
+    // Get the value of the setting we've registered with register_setting()
+    $options = get_option('fusesport_options');
+  ?>
+    <input style="width: 400px" type="password" placeholder="Password" id="<?php echo esc_attr($args['label_for']); ?>" name="fusesport_options[<?php echo esc_attr($args['label_for']); ?>]" value="<?php echo isset($options[$args['label_for']]) ? esc_attr($options[$args['label_for']]) : ''; ?>" />
+    <p>Create application password at WP Admin → Users → Your Profile → Application Passwords → Add New then add the generated password here.</p>
   <?php
   }
 
