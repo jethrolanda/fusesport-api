@@ -37,8 +37,10 @@ const App = () => {
   return (
     <>
       <Button onClick={test} loading={loading}>
-        Test Call
+        Import Data
       </Button>
+      <br />
+      <p>Import data from FuseSport API to SportsPress</p>
     </>
   );
 };
