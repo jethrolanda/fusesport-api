@@ -61,22 +61,23 @@ class Sportspress
     foreach ($games as $key => $game) {
       $venueTermId = $this->createVenue($game['location']);
 
+      $team_ids = $this->createTeams(
+        array(
+          array(
+            'home_team_id' => $game['home_team_id'],
+            'home_team_name' => $game['home_team_name'],
+          ),
+          array(
+            'away_team_id' => $game['away_team_id'],
+            'away_team_name' => $game['away_team_name'],
+          )
+        )
+      );
       // Prepare event data (example: rugby match)
       $prepared_data = array(
         'title'        => $game['home_team_name'] . ' vs ' . $game['away_team_name'],
         'status'       => 'publish',
-        'teams'        => $this->createTeams(
-          array(
-            array(
-              'home_team_id' => $game['home_team_id'],
-              'home_team_name' => $game['home_team_name'],
-            ),
-            array(
-              'away_team_id' => $game['away_team_id'],
-              'away_team_name' => $game['away_team_name'],
-            )
-          )
-        ), // IDs of the teams
+        'teams'        => $team_ids, // IDs of the teams
         'date'         => $game['GameDate'],
         'venue'        => $venueTermId, // venue id
         'competition'  => $getLeagueId, // competion id or league id??
@@ -100,7 +101,7 @@ class Sportspress
         error_log('SportsPress Event Creation Failed: ' . $response->get_error_message());
       } else {
         $body = json_decode(wp_remote_retrieve_body($response), true);
-        error_log('SportsPress Event Created: ' . print_r($body, true));
+        error_log('SportsPress Event Created: ' . print_r($prepared_data['title'], true));
         // Assign venue
         wp_set_object_terms($body['id'], $venueTermId, 'sp_venue');
 
@@ -109,8 +110,41 @@ class Sportspress
 
         // Assign season
         wp_set_object_terms($body['id'], $sportspressSeasonId, 'sp_season');
+
+        // Mode
+        update_post_meta($body['id'], 'sp_format', 'league');
+
+        // Format
+        update_post_meta($body['id'], 'sp_mode', 'team');
+
+        // Results
+        $result[$team_ids[0]] = array(
+          "tries" => 0,
+          "conversions" => 0,
+          "pg" => 0,
+          "dg" => 0,
+          "points" => $game['home_team_score'],
+          "outcome" => array(
+            $game['home_team_score'] > $game['away_team_score'] ? "win" : "loss"
+          )
+        );
+        $result[$team_ids[1]] = array(
+          "tries" => 0,
+          "conversions" => 0,
+          "pg" => 0,
+          "dg" => 0,
+          "points" => $game['away_team_score'],
+          "outcome" => array(
+            $game['away_team_score'] > $game['home_team_score'] ? "win" : "loss"
+          )
+        );
+
+        update_post_meta(
+          $body['id'],
+          'sp_results',
+          $result
+        );
       }
-      if ($key == 1) break;
     }
     // error_log(print_r($games, true));
   }

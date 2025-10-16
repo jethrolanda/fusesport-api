@@ -25,6 +25,8 @@ define('FSA_TEMPLATES_ROOT_URL',     FSA_PLUGIN_URL . 'templates/');
 define('FSA_TEMPLATES_ROOT_DIR',     FSA_PLUGIN_DIR . 'templates/');
 define('FSA_BLOCKS_ROOT_URL',        FSA_PLUGIN_URL . 'blocks/');
 define('FSA_BLOCKS_ROOT_DIR',        FSA_PLUGIN_DIR . 'blocks/');
+define('FSA_VIEWS_ROOT_URL',         FSA_PLUGIN_URL . 'views/');
+define('FSA_VIEWS_ROOT_DIR',         FSA_PLUGIN_DIR . 'views/');
 
 // Require autoloader
 require_once 'inc/autoloader.php';
