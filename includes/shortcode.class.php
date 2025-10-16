@@ -40,7 +40,7 @@ class Shortcode
 
   function fusesports_fixtures($atts)
   {
-    return;
+
     $atts = shortcode_atts(array(
       'season_id' => '',
       'competition_id' => ''
