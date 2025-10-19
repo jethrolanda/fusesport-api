@@ -59,6 +59,12 @@ class Sportspress
     $getLeagueId = $this->getTermLeagueIdByName($leagueName);
 
     foreach ($games as $key => $game) {
+
+      // Skip if already added
+      if ($this->checkIfGameIdAlreadyExist($game['id'])) {
+        continue;
+      }
+
       $venueTermId = $this->createVenue($game['location']);
 
       $team_ids = $this->createTeams(
@@ -118,34 +124,44 @@ class Sportspress
         update_post_meta($body['id'], 'sp_mode', 'team');
 
         // Results
-        $result[$team_ids[0]] = array(
-          "tries" => 0,
-          "conversions" => 0,
-          "pg" => 0,
-          "dg" => 0,
-          "points" => $game['home_team_score'],
-          "outcome" => array(
-            $game['home_team_score'] > $game['away_team_score'] ? "win" : "loss"
-          )
-        );
-        $result[$team_ids[1]] = array(
-          "tries" => 0,
-          "conversions" => 0,
-          "pg" => 0,
-          "dg" => 0,
-          "points" => $game['away_team_score'],
-          "outcome" => array(
-            $game['away_team_score'] > $game['home_team_score'] ? "win" : "loss"
-          )
-        );
+        if (isset($game['home_team_score']) && $game['away_team_score']) {
+          $result = array();
+          $result[$team_ids[0]] = array(
+            "tries" => 0,
+            "conversions" => 0,
+            "pg" => 0,
+            "dg" => 0,
+            "points" => $game['home_team_score'],
+            "outcome" => array(
+              $game['home_team_score'] > $game['away_team_score'] ? "win" : "loss"
+            )
+          );
+          $result[$team_ids[1]] = array(
+            "tries" => 0,
+            "conversions" => 0,
+            "pg" => 0,
+            "dg" => 0,
+            "points" => $game['away_team_score'],
+            "outcome" => array(
+              $game['away_team_score'] > $game['home_team_score'] ? "win" : "loss"
+            )
+          );
 
+          update_post_meta(
+            $body['id'],
+            'sp_results',
+            $result
+          );
+        }
+
+        // Add game ID
         update_post_meta(
           $body['id'],
-          'sp_results',
-          $result
+          'game_id',
+          $game['id']
         );
       }
-      // if ($key == 5) break;
+      // if ($key == 1) break;
     }
     // error_log(print_r($games, true));
   }
@@ -295,5 +311,26 @@ class Sportspress
       return (int) $post_id;
     }
     return false;
+  }
+
+  public function checkIfGameIdAlreadyExist($meta_value)
+  {
+    global $wpdb;
+
+    $meta_key   = 'game_id';
+
+    $result = $wpdb->get_var($wpdb->prepare(
+      "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = %s AND meta_value = %s LIMIT 1",
+      $meta_key,
+      $meta_value
+    ));
+
+    if ($result) {
+      // echo "✅ Found in post ID: $result";
+      return true;
+    } else {
+      // echo "❌ Not found";
+      return false;
+    }
   }
 }

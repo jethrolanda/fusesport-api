@@ -2,6 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-.ant-drawer.ant-drawer-right{
-  // z-index: 99999!important;
+.ant-popover{
+  z-index: 99999!important;
 }

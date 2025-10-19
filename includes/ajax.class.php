@@ -31,7 +31,7 @@ class Ajax
   public function __construct()
   {
     // Fetch fuel savings data items via ajax 
-    add_action("wp_ajax_wppb_get_custom_block_patterns", array($this, 'wppb_get_custom_block_patterns'));
+    add_action("wp_ajax_delete_events", array($this, 'delete_events'));
   }
 
   /**
@@ -52,29 +52,39 @@ class Ajax
    * 
    * @since 1.0
    */
-  public function wppb_get_custom_block_patterns()
+  public function delete_events()
   {
 
     if (!defined('DOING_AJAX') || !DOING_AJAX) {
       wp_die();
     }
 
-    /**
-     * Verify nonce
-     */
-    if (isset($_POST['nonce']) && !wp_verify_nonce($_POST['nonce'], 'settings_nonce')) {
+    if (!is_user_logged_in()) {
       wp_die();
     }
 
     try {
 
-      global $wpdb;
+      $post_type = 'sp_event';
+      $batch_size = 100;
 
-      $table_name = $wpdb->prefix . 'posts ORDER BY date DESC';
-      $data = $wpdb->get_results("SELECT * FROM $table_name");
+      while (true) {
+        $posts = get_posts([
+          'post_type'      => $post_type,
+          'post_status'    => 'any',
+          'numberposts'    => $batch_size,
+          'fields'         => 'ids',
+        ]);
 
+        if (empty($posts)) break;
 
-      error_log(print_r($data, true));
+        foreach ($posts as $post_id) {
+          wp_delete_post($post_id, true); // force delete
+        }
+
+        // optional: short sleep to prevent timeout
+        // sleep(1);
+      }
 
       wp_send_json(array(
         'status' => 'success',
