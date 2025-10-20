@@ -78,5 +78,20 @@ class Cron
   public function fusesport_schedule_update()
   {
     error_log('test cron');
+    $new_post = array(
+      'post_title'   => 'Test cron',
+      'post_content' => 'This post was created using PHP!',
+      'post_status'  => 'draft',  // Options: 'publish', 'draft', 'pending', etc.
+      'post_author'  => 8,          // Usually the admin user ID
+      'post_type'    => 'sp_event',     // You can also use custom post types
+    );
+
+    $post_id = wp_insert_post($new_post);
+
+    if ($post_id && ! is_wp_error($post_id)) {
+      echo "✅ Post created successfully with ID: $post_id";
+    } else {
+      echo "❌ Failed to create post.";
+    }
   }
 }
