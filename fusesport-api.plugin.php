@@ -23,6 +23,7 @@ class FuseSport_API
 	public $fusesport;
 	public $settings;
 	public $sportspress;
+	public $cron;
 
 	const VERSION = '1.0';
 
@@ -48,13 +49,14 @@ class FuseSport_API
 		$this->fusesport = FSA\Plugin\Fusesport::instance();
 		$this->settings = FSA\Plugin\Settings::instance();
 		$this->sportspress = \FSA\Plugin\Sportspress::instance();
+		$this->cron = \FSA\Plugin\Cron::instance();
 
 
 		// Register Activation Hook
-		register_activation_hook(FSA_PLUGIN_DIR . 'wp-plugin-boilerplate.php', array($this, 'activate'));
+		register_activation_hook(FSA_PLUGIN_DIR . 'fusesport-api.php', array($this, 'activate'));
 
 		// Register Deactivation Hook
-		register_deactivation_hook(FSA_PLUGIN_DIR . 'wp-plugin-boilerplate.php', array($this, 'deactivate'));
+		register_deactivation_hook(FSA_PLUGIN_DIR . 'fusesport-api.php', array($this, 'deactivate'));
 	}
 
 	/**

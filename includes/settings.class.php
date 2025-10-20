@@ -2,6 +2,8 @@
 
 namespace FSA\Plugin;
 
+use Error;
+
 /** 
  * @since   1.0
  */
@@ -36,6 +38,8 @@ class Settings
      * Register our register_options_page to the admin_menu action hook.
      */
     add_action('admin_menu', array($this, 'register_options_page'));
+
+    add_action('update_option_fusesport_options', array($this, 'on_setting_page_update'), 10, 2);
   }
 
   /**
@@ -141,6 +145,19 @@ class Settings
         'class'             => 'fusesport_row',
       )
     );
+
+    add_settings_field(
+      'fusesport_field_schedule_update', // As of WP 4.6 this value is used only internally.
+      // Use $args' label_for to populate the id inside the callback.
+      __('Schedule Update', 'fusesport'),
+      array($this, 'fusesport_schedule_update_cb'),
+      'fusesport',
+      'fusesport_section_developers',
+      array(
+        'label_for'         => 'fusesport_field_schedule_update',
+        'class'             => 'fusesport_row',
+      )
+    );
   }
 
 
@@ -214,6 +231,21 @@ class Settings
   <?php
   }
 
+  public function fusesport_schedule_update_cb($args)
+  {
+    // Get the value of the setting we've registered with register_setting()
+    $options = get_option('fusesport_options');
+    $value = isset($options[$args['label_for']]) ? esc_attr($options[$args['label_for']]) : '';
+  ?>
+    <select name="fusesport_options[<?php echo esc_attr($args['label_for']); ?>]" id="<?php echo esc_attr($args['label_for']); ?>">
+      <option value="daily" <?php selected($value, 'daily'); ?>>Daily</option>
+      <option value="weekly" <?php selected($value, 'weekly'); ?>>Weekly</option>
+    </select>
+    <p>Schedule auto import.</p>
+  <?php
+  }
+
+
   /**
    * Add the top level menu page.
    */
@@ -267,5 +299,22 @@ class Settings
 
     <div id="fusesport"></div>
 <?php
+  }
+
+  // 3️⃣ React to setting change — reschedule event if needed
+  public function on_setting_page_update($old, $new)
+  {
+    global $fsa;
+    error_log('on_setting_page_update');
+    // error_log(print_r($old, true));
+    // error_log(print_r($new, true));
+
+    if ($old['fusesport_field_schedule_update'] !== $new['fusesport_field_schedule_update']) {
+      // Remove old schedule
+      wp_clear_scheduled_hook('fusesport_schedule_update');
+
+      // Add new schedule
+      wp_schedule_event(time(), $new['fusesport_field_schedule_update'], 'fusesport_schedule_update');
+    }
   }
 }
