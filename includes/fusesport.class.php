@@ -133,42 +133,4 @@ class Fusesport
       }
     }
   }
-
-  public function api_request()
-  {
-    global $fsa;
-
-    $options = get_option('fusesport_options');
-
-    $requested_token = $this->request_token();
-    if ($requested_token['status'] === 'success') {
-
-      // You can get scheduling, scores and ladder info from https://rugbyresults.fusesport.com/api/rugby/main_detail/
-      // 1313 is the season_id for the whole 2025 Premiership Rugby season.
-      // It’s recommended to filter the results by adding ?competitionID=1688636 for Chikarovski Cup or ?competitionID=1688637 for Women's Div 2
-
-      $season_id = $options['fusesport_field_season_id'];
-      $url = 'https://rugbyresults.fusesport.com/api/rugby/main_detail/' . $season_id . '?competitionID=' . $_POST['competitionID'];
-      $token = $requested_token['token'];
-
-      $response = wp_remote_get($url, array(
-        'headers' => array(
-          'Authorization' => 'Bearer ' . $token,
-          'Accept'        => 'application/json',
-        ),
-      ));
-
-      if (is_wp_error($response)) {
-        error_log(print_r(array(
-          'status' => 'error',
-          'message' => $response->get_error_message(),
-        ), true));
-      } else {
-
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
-        $fsa->sportspress->createEvents($data);
-      }
-    }
-  }
 }

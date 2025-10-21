@@ -64,8 +64,8 @@ class Sportspress
       if ($this->checkIfGameIdAlreadyExist($game['id'])) {
         continue;
       }
-
-      $venueTermId = $this->createVenue($game['location']);
+      $location = isset($game['location']) && !empty(trim($game['location'])) ? trim($game['location']) : '';
+      $venueTermId = empty($location) ? 0 : $this->createVenue($location);
 
       $team_ids = $this->createTeams(
         array(
@@ -89,7 +89,7 @@ class Sportspress
         'competition'  => $getLeagueId, // competion id or league id??
         'season'       => $sportspressSeasonId // season id
       );
-      error_log(print_r($prepared_data, true));
+      // error_log(print_r($prepared_data, true));
       $args = array(
         'headers' => array(
           'Authorization' => 'Basic ' . base64_encode("$username:$app_password"),
@@ -104,10 +104,10 @@ class Sportspress
       $response = wp_remote_post($url, $args);
 
       if (is_wp_error($response)) {
-        error_log('SportsPress Event Creation Failed: ' . $response->get_error_message());
+        // error_log('SportsPress Event Creation Failed: ' . $response->get_error_message());
       } else {
         $body = json_decode(wp_remote_retrieve_body($response), true);
-        error_log('SportsPress Event Created: ' . print_r($prepared_data['title'], true));
+        // error_log('SportsPress Event Created: ' . print_r($prepared_data['title'], true));
         // Assign venue
         wp_set_object_terms($body['id'], $venueTermId, 'sp_venue');
 
@@ -168,25 +168,37 @@ class Sportspress
 
   public function createTeams($teams)
   {
-    error_log(print_r($teams, true));
+    // error_log(print_r($teams, true));
 
     $options = get_option('fusesport_options');
     $url = $this->getSiteUrl() . '/wp-json/sportspress/v2/teams';
     $username =  $options['sportspress_field_api_username'];
     $app_password = $options['sportspress_field_api_password'];
     $team_ids = array();
+    error_log('createTeams: ' . print_r($teams, true));
     foreach ($teams as $team) {
 
-      $teamname = isset($team['away_team_name']) ? $team['away_team_name'] : $team['home_team_name'];
+      $team_name = isset($team['away_team_name']) ? trim($team['away_team_name']) : trim($team['home_team_name']);
+      $team_id_api = isset($team['away_team_id']) ? $team['away_team_id'] : $team['home_team_id'];
+
+      error_log('team_name: ' . print_r($team_name, true));
+      error_log('team_id_api: ' . print_r($team_id_api, true));
+
+      // Skip creating team
+      if ($team_id_api == 0) {
+        $team_ids[] = 0;
+        continue;
+      }
 
       // Check if team exist
-      if ($team_id = $this->getTeamIdIfExist($teamname, 'sp_team')) {
+      $team_id = $this->checkIfTeamIdAlreadyExist($team_name);
+      if ($team_id > 0) {
         $team_ids[] = $team_id;
         continue;
       }
 
       $data = array(
-        'title'       => $teamname,
+        'title'       => $team_name,
         'status'      => 'publish',
         'description' => ''
       );
@@ -200,15 +212,20 @@ class Sportspress
         'timeout' => 60 // increase timeout for Docker or slow connections
       );
 
+
       $response = wp_remote_post($url, $args);
 
       if (is_wp_error($response)) {
-        error_log('SportsPress Team Creation Failed: ' . $response->get_error_message());
+        // error_log('SportsPress Team Creation Failed: ' . $response->get_error_message());
         $team_ids[] = 0;
       } else {
         $body = json_decode(wp_remote_retrieve_body($response), true);
-        error_log('SportsPress Team Created: ' . $teamname);
+        // error_log('SportsPress Team Created: ' . $team_name);
         $team_ids[] = $body['id'];
+
+        // error_log('createTeams post id: ' . print_r($body['id'], true));
+        // error_log('createTeams team id: ' . print_r($team_id_api, true));
+        update_post_meta($body['id'], 'team_id', $team_id_api);
       }
     }
 
@@ -242,11 +259,11 @@ class Sportspress
     $response = wp_remote_post($url, $args);
 
     if (is_wp_error($response)) {
-      error_log('SportsPress Venue Creation Failed: ' . $response->get_error_message());
+      // error_log('SportsPress Venue Creation Failed: ' . $response->get_error_message());
       return 0;
     } else {
       $data = json_decode(wp_remote_retrieve_body($response));
-      error_log('SportsPress Venue Created: ' . $venue);
+      // error_log('SportsPress Venue Created: ' . $venue);
       if (isset($data->code) && $data->code == 'term_exists')
         return $data->data->term_id;
 
@@ -296,38 +313,51 @@ class Sportspress
   }
 
 
-  public function getTeamIdIfExist($title, $post_type)
+  public function checkIfTeamIdAlreadyExist($team_name)
   {
     global $wpdb;
+
+    $post_type = 'sp_team';
 
     // Try to find the post by title (exact match)
     $post_id = $wpdb->get_var($wpdb->prepare(
       "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = %s AND post_status != 'trash' LIMIT 1",
-      $title,
+      $team_name,
       $post_type
     ));
 
+    // check by the api team id
+    // issue: there are 2 different id for the same team
+
+    // $post_id = $wpdb->get_var($wpdb->prepare(
+    //   "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = %s AND meta_value = %s LIMIT 1",
+    //   $meta_key,
+    //   $team_id_api
+    // ));
+
+    // error_log('checkIfTeamIdAlreadyExist: ' . print_r($post_id, true));
     if ($post_id) {
       return (int) $post_id;
     }
     return false;
   }
 
-  public function checkIfGameIdAlreadyExist($meta_value)
+  public function checkIfGameIdAlreadyExist($game_id)
   {
     global $wpdb;
 
-    $meta_key   = 'game_id';
+    $meta_key = 'game_id';
 
-    $result = $wpdb->get_var($wpdb->prepare(
+    $post_id = $wpdb->get_var($wpdb->prepare(
       "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = %s AND meta_value = %s LIMIT 1",
       $meta_key,
-      $meta_value
+      $game_id
     ));
 
-    if ($result) {
+    // error_log('checkIfGameIdAlreadyExist: ' . print_r($post_id, true));
+    if ($post_id) {
       // echo "✅ Found in post ID: $result";
-      return true;
+      return $post_id;
     } else {
       // echo "❌ Not found";
       return false;

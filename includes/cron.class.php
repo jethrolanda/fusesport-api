@@ -78,20 +78,38 @@ class Cron
   public function fusesport_schedule_update()
   {
     error_log('test cron');
-    $new_post = array(
-      'post_title'   => 'Test cron',
-      'post_content' => 'This post was created using PHP!',
-      'post_status'  => 'draft',  // Options: 'publish', 'draft', 'pending', etc.
-      'post_author'  => 8,          // Usually the admin user ID
-      'post_type'    => 'sp_event',     // You can also use custom post types
-    );
 
-    $post_id = wp_insert_post($new_post);
+    global $fsa;
 
-    if ($post_id && ! is_wp_error($post_id)) {
-      echo "✅ Post created successfully with ID: $post_id";
-    } else {
-      echo "❌ Failed to create post.";
+    $options = get_option('fusesport_options');
+    $season_id = $options['fusesport_field_season_id'];
+    $requested_token = $fsa->fusesport->request_token();
+
+    if ($requested_token['status'] === 'success') {
+
+      foreach ($options['fusesport_field_competition_ids'] as $competition_id) {
+        $url = 'https://rugbyresults.fusesport.com/api/rugby/main_detail/' . $season_id . '?competitionID=' . $competition_id;
+        $token = $requested_token['token'];
+
+        $response = wp_remote_get($url, array(
+          'headers' => array(
+            'Authorization' => 'Bearer ' . $token,
+            'Accept'        => 'application/json',
+          ),
+        ));
+
+        if (is_wp_error($response)) {
+          error_log(print_r(array(
+            'status' => 'error',
+            'message' => $response->get_error_message(),
+          ), true));
+        } else {
+
+          $body = wp_remote_retrieve_body($response);
+          $data = json_decode($body, true);
+          $fsa->sportspress->createEvents($data);
+        }
+      }
     }
   }
 }
