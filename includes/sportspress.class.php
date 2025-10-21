@@ -175,14 +175,12 @@ class Sportspress
     $username =  $options['sportspress_field_api_username'];
     $app_password = $options['sportspress_field_api_password'];
     $team_ids = array();
-    error_log('createTeams: ' . print_r($teams, true));
+
     foreach ($teams as $team) {
 
       $team_name = isset($team['away_team_name']) ? trim($team['away_team_name']) : trim($team['home_team_name']);
       $team_id_api = isset($team['away_team_id']) ? $team['away_team_id'] : $team['home_team_id'];
 
-      error_log('team_name: ' . print_r($team_name, true));
-      error_log('team_id_api: ' . print_r($team_id_api, true));
 
       // Skip creating team
       if ($team_id_api == 0) {

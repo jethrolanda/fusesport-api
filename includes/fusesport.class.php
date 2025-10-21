@@ -94,43 +94,52 @@ class Fusesport
       wp_die();
     }
 
-    global $fsa;
+    try {
+      global $fsa;
 
-    $options = get_option('fusesport_options');
-
-    $requested_token = $this->request_token();
-    if ($requested_token['status'] === 'success') {
-
-      // You can get scheduling, scores and ladder info from https://rugbyresults.fusesport.com/api/rugby/main_detail/
-      // 1313 is the season_id for the whole 2025 Premiership Rugby season.
-      // It’s recommended to filter the results by adding ?competitionID=1688636 for Chikarovski Cup or ?competitionID=1688637 for Women's Div 2
-
+      $options = get_option('fusesport_options');
       $season_id = $options['fusesport_field_season_id'];
-      $url = 'https://rugbyresults.fusesport.com/api/rugby/main_detail/' . $season_id . '?competitionID=' . $_POST['competitionID'];
-      $token = $requested_token['token'];
+      $requested_token = $this->request_token();
 
-      $response = wp_remote_get($url, array(
-        'headers' => array(
-          'Authorization' => 'Bearer ' . $token,
-          'Accept'        => 'application/json',
-        ),
-      ));
+      if ($requested_token['status'] === 'success') {
+        $fusesport_competition_ids = array_map('trim', explode(",", $options['fusesport_field_competition_ids']));
+        // You can get scheduling, scores and ladder info from https://rugbyresults.fusesport.com/api/rugby/main_detail/
+        // 1313 is the season_id for the whole 2025 Premiership Rugby season.
+        // It’s recommended to filter the results by adding ?competitionID=1688636 for Chikarovski Cup or ?competitionID=1688637 for Women's Div 2
 
-      if (is_wp_error($response)) {
-        wp_send_json(array(
-          'status' => 'error',
-          'message' => $response->get_error_message(),
-        ));
-      } else {
+        foreach ($fusesport_competition_ids as $competition_id) {
+          $url = 'https://rugbyresults.fusesport.com/api/rugby/main_detail/' . $season_id . '?competitionID=' . $competition_id;
+          $token = $requested_token['token'];
 
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
-        $fsa->sportspress->createEvents($data);
-        wp_send_json(array(
-          'status' => 'success',
-          'data' => $data,
-        ));
+          $response = wp_remote_get($url, array(
+            'headers' => array(
+              'Authorization' => 'Bearer ' . $token,
+              'Accept'        => 'application/json',
+            ),
+          ));
+
+          if (is_wp_error($response)) {
+            wp_send_json(array(
+              'status' => 'error',
+              'message' => $response->get_error_message(),
+            ));
+          } else {
+            $body = wp_remote_retrieve_body($response);
+            $data = json_decode($body, true);
+            $fsa->sportspress->createEvents($data);
+          }
+        }
       }
+
+      wp_send_json(array(
+        'status' => 'success',
+        'data' => $data,
+      ));
+    } catch (\Exception $e) {
+      wp_send_json(array(
+        'status' => 'error',
+        'message' => $e->getMessage(),
+      ));
     }
   }
 }

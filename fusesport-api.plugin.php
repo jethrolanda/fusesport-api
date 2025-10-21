@@ -80,12 +80,21 @@ class FuseSport_API
 	 *
 	 * @since 1.0.0
 	 */
-	public function activate() {}
+	public function activate()
+	{
+		// On activation, add event in cron to delete all cached json files. Trigger twice a day.
+		if (!wp_next_scheduled('fusesport_schedule_update')) {
+			wp_schedule_event(time(), 'twicedaily', 'fusesport_schedule_update');
+		}
+	}
 
 	/**
 	 * Trigger on deactivation
 	 *
 	 * @since 1.0.0
 	 */
-	public function deactivate() {}
+	public function deactivate()
+	{
+		wp_clear_scheduled_hook('fusesport_schedule_update');
+	}
 }

@@ -6,10 +6,10 @@ const App = () => {
   const [deleting, setDeleting] = useState(false);
 
   const [api, contextHolder] = notification.useNotification();
-  const openNotificationWithIcon = (type, name) => {
+  const openNotificationWithIcon = (type) => {
     api[type]({
       message: "Import Successful!",
-      description: `${name} imported successfully!`
+      description: `Competitions imported successfully!`
     });
   };
 
@@ -18,37 +18,33 @@ const App = () => {
       try {
         setLoading(true);
 
-        const promises = fusesport_params?.fusesport_competition_ids.map(
-          async (id) => {
-            const response = await fetch(fusesport_params.ajax_url, {
-              method: "POST",
-              headers: {
-                "X-WP-Nonce": fusesport_params.nonce,
-                "Content-Type":
-                  "application/x-www-form-urlencoded; charset=UTF-8"
-              },
-              body: new URLSearchParams({
-                action: "fusesport_api",
-                competitionID: id
-              })
-            });
+        // const promises = fusesport_params?.fusesport_competition_ids.map(
+        //   async (id) => {
+        const response = await fetch(fusesport_params.ajax_url, {
+          method: "POST",
+          headers: {
+            "X-WP-Nonce": fusesport_params.nonce,
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+          },
+          body: new URLSearchParams({
+            action: "fusesport_api"
+          })
+        });
 
-            if (!response.ok) throw new Error("API request failed");
-            const { status, data } = await response.json();
+        if (!response.ok) throw new Error("API request failed");
+        const { status, data } = await response.json();
 
-            console.log(data);
-            if (status === "success") {
-              openNotificationWithIcon(
-                "success",
-                data?.["rugby-schedule"]?.[0]?.["competitions"]?.[0]?.[
-                  "full_name"
-                ]
-              );
-            }
-          }
-        );
+        console.log(data);
+        if (status === "success") {
+          openNotificationWithIcon(
+            "success"
+            // data?.["rugby-schedule"]?.[0]?.["competitions"]?.[0]?.["full_name"]
+          );
+        }
+        // }
+        // );
 
-        await Promise.all(promises);
+        // await Promise.all(promises);
       } catch (error) {
         console.error("Error fetching orders:", error);
       } finally {

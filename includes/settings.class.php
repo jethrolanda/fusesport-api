@@ -39,7 +39,8 @@ class Settings
      */
     add_action('admin_menu', array($this, 'register_options_page'));
 
-    add_action('update_option_fusesport_options', array($this, 'on_setting_page_update'), 10, 2);
+    // add_action('update_option_fusesport_options', array($this, 'on_setting_page_update'), 10, 2);
+    add_action('updated_option', array($this, 'on_update_option'), 10, 3);
   }
 
   /**
@@ -241,7 +242,7 @@ class Settings
       <option value="daily" <?php selected($value, 'daily'); ?>>Daily</option>
       <option value="weekly" <?php selected($value, 'weekly'); ?>>Weekly</option>
     </select>
-    <p>Schedule auto import.</p>
+    <p>Schedule auto import FuseSports API to SportsPress.</p>
   <?php
   }
 
@@ -309,12 +310,25 @@ class Settings
     // error_log(print_r($old, true));
     // error_log(print_r($new, true));
 
-    if ($old['fusesport_field_schedule_update'] !== $new['fusesport_field_schedule_update']) {
+    if ($old['fusesport_field_schedule_update'] != $new['fusesport_field_schedule_update']) {
       // Remove old schedule
       wp_clear_scheduled_hook('fusesport_schedule_update');
 
       // Add new schedule
       wp_schedule_event(time(), $new['fusesport_field_schedule_update'], 'fusesport_schedule_update');
+    }
+  }
+
+  // Fallback if above misses
+  public function on_update_option($option, $old, $new)
+  {
+    if ($option === 'fusesport_options') {
+      $hook = 'fusesport_schedule_update';
+      while ($timestamp = wp_next_scheduled($hook)) {
+        wp_unschedule_event($timestamp, $hook);
+      }
+      $frequency = $new['fusesport_field_schedule_update'];
+      wp_schedule_event(time(), $frequency, $hook);
     }
   }
 }

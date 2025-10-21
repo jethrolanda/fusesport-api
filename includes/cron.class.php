@@ -41,22 +41,10 @@ class Cron
 
   function add_custom_cron_schedules($schedules)
   {
-    // Adds once every 5 minutes
-    if (! isset($schedules['every_five_minutes'])) {
-      $schedules['every_five_minutes'] = array(
-        'interval' => 5 * 60,
-        'display'  => __('Every 5 Minutes'),
-      );
-    }
-
-    // Example: add twice daily if you like
-    if (! isset($schedules['twice_daily'])) {
-      $schedules['twice_daily'] = array(
-        'interval' => 12 * HOUR_IN_SECONDS,
-        'display'  => __('Twice Daily'),
-      );
-    }
-
+    $schedules['weekly'] = [
+      'interval' => 7 * DAY_IN_SECONDS, // 604800 seconds
+      'display'  => __('Once Weekly'),
+    ];
     return $schedules;
   }
 
@@ -86,8 +74,9 @@ class Cron
     $requested_token = $fsa->fusesport->request_token();
 
     if ($requested_token['status'] === 'success') {
+      $fusesport_competition_ids = array_map('trim', explode(",", $options['fusesport_field_competition_ids']));
 
-      foreach ($options['fusesport_field_competition_ids'] as $competition_id) {
+      foreach ($fusesport_competition_ids as $competition_id) {
         $url = 'https://rugbyresults.fusesport.com/api/rugby/main_detail/' . $season_id . '?competitionID=' . $competition_id;
         $token = $requested_token['token'];
 
