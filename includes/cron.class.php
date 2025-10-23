@@ -45,6 +45,10 @@ class Cron
       'interval' => 7 * DAY_IN_SECONDS, // 604800 seconds
       'display'  => __('Once Weekly'),
     ];
+    $schedules['every_fifteen_minutes'] = array(
+      'interval' => 15 * 60, // 15 minutes in seconds
+      'display'  => __('Every 15 Minutes'),
+    );
     return $schedules;
   }
 

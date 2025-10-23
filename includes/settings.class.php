@@ -241,6 +241,7 @@ class Settings
     <select name="fusesport_options[<?php echo esc_attr($args['label_for']); ?>]" id="<?php echo esc_attr($args['label_for']); ?>">
       <option value="daily" <?php selected($value, 'daily'); ?>>Daily</option>
       <option value="weekly" <?php selected($value, 'weekly'); ?>>Weekly</option>
+      <option value="every_fifteen_minutes" <?php selected($value, 'every_fifteen_minutes'); ?>>15 Mins</option>
     </select>
     <p>Schedule auto import FuseSports API to SportsPress.</p>
   <?php
