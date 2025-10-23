@@ -52,12 +52,11 @@ class Sportspress
     // Replace with your WordPress application credentials
     $username =  $options['sportspress_field_api_username'];
     $app_password = $options['sportspress_field_api_password'];
-    $games = $this->getAllGames($data);
-    $leagueName = $data['name'];
+    $games = $data['rugby-schedule'][0]['competitions'][0]['games'];
+    $leagueName = $data['rugby-schedule'][0]['competitions'][0]['name'];
 
     $sportspressSeasonId = $this->getTermSeasonIdByName('2025');
     $getLeagueId = $this->getTermLeagueIdByName($leagueName);
-
 
     foreach ($games as $key => $game) {
 
@@ -70,16 +69,22 @@ class Sportspress
 
       $team_ids = $this->createTeams(
         array(
-          $game['hmteam'],
-          $game['awteam']
+          array(
+            'home_team_id' => $game['home_team_id'],
+            'home_team_name' => $game['home_team_name'],
+          ),
+          array(
+            'away_team_id' => $game['away_team_id'],
+            'away_team_name' => $game['away_team_name'],
+          )
         )
       );
       // Prepare event data (example: rugby match)
       $prepared_data = array(
-        'title'        => $game['game_title'][0],
+        'title'        => $game['home_team_name'] . ' vs ' . $game['away_team_name'],
         'status'       => 'publish',
         'teams'        => $team_ids, // IDs of the teams
-        'date'         => $game['gamedate'],
+        'date'         => $game['GameDate'],
         'venue'        => $venueTermId, // venue id
         'competition'  => $getLeagueId, // competion id or league id??
         'season'       => $sportspressSeasonId // season id
@@ -119,16 +124,16 @@ class Sportspress
         update_post_meta($body['id'], 'sp_mode', 'team');
 
         // Results
-        if (isset($game['hmscore']) && $game['hmscore'] != null && $game['awscore'] && $game['awscore'] != null) {
+        if (isset($game['home_team_score']) && $game['away_team_score']) {
           $result = array();
           $result[$team_ids[0]] = array(
             "tries" => 0,
             "conversions" => 0,
             "pg" => 0,
             "dg" => 0,
-            "points" => $game['hmscore'],
+            "points" => $game['home_team_score'],
             "outcome" => array(
-              $game['hmscore'] > $game['awscore'] ? "win" : "loss"
+              $game['home_team_score'] > $game['away_team_score'] ? "win" : "loss"
             )
           );
           $result[$team_ids[1]] = array(
@@ -136,9 +141,9 @@ class Sportspress
             "conversions" => 0,
             "pg" => 0,
             "dg" => 0,
-            "points" => $game['awscore'],
+            "points" => $game['away_team_score'],
             "outcome" => array(
-              $game['awscore'] > $game['hmscore'] ? "win" : "loss"
+              $game['away_team_score'] > $game['home_team_score'] ? "win" : "loss"
             )
           );
 
@@ -173,11 +178,12 @@ class Sportspress
 
     foreach ($teams as $team) {
 
-      $team_name = isset($team['team_name']) ? trim($team['team_name']) : "";
-      $team_id_api = isset($team['id']) ? $team['id'] : "";
+      $team_name = isset($team['away_team_name']) ? trim($team['away_team_name']) : trim($team['home_team_name']);
+      $team_id_api = isset($team['away_team_id']) ? $team['away_team_id'] : $team['home_team_id'];
+
 
       // Skip creating team
-      if ($team_id_api == 0 || empty($team_name)) {
+      if ($team_id_api == 0) {
         $team_ids[] = 0;
         continue;
       }
@@ -218,15 +224,6 @@ class Sportspress
         // error_log('createTeams post id: ' . print_r($body['id'], true));
         // error_log('createTeams team id: ' . print_r($team_id_api, true));
         update_post_meta($body['id'], 'team_id', $team_id_api);
-
-        $image_url = $team['logo_url'];
-
-        $post_id   = $body['id']; // Optional – ID of post to attach to
-        $attachment_id = $this->createAttachmentFromUrl($image_url, $post_id);
-        error_log('Team Logo ID: ' . print_r($attachment_id, true));
-        // if ($attachment_id) {
-        //   echo 'Created attachment ID: ' . $attachment_id;
-        // }
       }
     }
 
@@ -363,54 +360,5 @@ class Sportspress
       // echo "❌ Not found";
       return false;
     }
-  }
-
-  public function getAllGames($data)
-  {
-    $games = array();
-    foreach ($data['round_objects'] as $round) {
-      foreach ($round['games'] as $game) {
-        $games[] = $game;
-      }
-    }
-    return $games;
-  }
-
-  public function createAttachmentFromUrl($image_url, $post_id = 0)
-  {
-    // Include required WordPress core files
-    require_once ABSPATH . 'wp-admin/includes/file.php';
-    require_once ABSPATH . 'wp-admin/includes/media.php';
-    require_once ABSPATH . 'wp-admin/includes/image.php';
-
-    // Download the image to a temporary file
-    $tmp = download_url($image_url);
-
-    // Check for download errors
-    if (is_wp_error($tmp)) {
-      error_log('Image download failed: ' . $tmp->get_error_message());
-      return false;
-    }
-
-    // Set up a proper filename
-    $file_array = array(
-      'name'     => basename(parse_url($image_url, PHP_URL_PATH)),
-      'tmp_name' => $tmp
-    );
-
-    // Do the sideload (upload to media library and create attachment)
-    $attachment_id = media_handle_sideload($file_array, $post_id);
-
-    // Clean up if something went wrong
-    if (is_wp_error($attachment_id)) {
-      @unlink($tmp);
-      error_log('Attachment creation failed: ' . $attachment_id->get_error_message());
-      return false;
-    }
-
-    // (Optional) Set as featured image
-    set_post_thumbnail($post_id, $attachment_id);
-
-    return $attachment_id;
   }
 }

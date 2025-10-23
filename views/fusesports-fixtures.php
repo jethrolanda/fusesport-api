@@ -27,10 +27,10 @@ foreach ($fixtures['round_objects'] as $round) {
         $datetime = new DateTime($game['gamedate'], new DateTimeZone('UTC')); ?>
         <tr class="withIcon">
           <td class="team"><?php echo $game['hmteam']['team_name']; ?></td>
-          <td class="points"><?php echo $game['hmscore']; ?></td>
+          <td class="points"><?php echo $game['hmscore'] ?: 0; ?></td>
           <td class="vs">v</td>
           <td class="points"><?php echo $game['awteam']['team_name']; ?></td>
-          <td class="team"><?php echo $game['awscore']; ?></td>
+          <td class="team"><?php echo $game['awscore'] ?: 0; ?></td>
           <td data-label="Location" class="location"><?php echo $game['location']; ?></td>
           <td data-label="Date/Time"><?php echo esc_html($datetime->format($game_date_format)); ?></td>
         </tr>

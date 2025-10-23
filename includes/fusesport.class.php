@@ -108,15 +108,18 @@ class Fusesport
         // It’s recommended to filter the results by adding ?competitionID=1688636 for Chikarovski Cup or ?competitionID=1688637 for Women's Div 2
 
         foreach ($fusesport_competition_ids as $competition_id) {
-          $url = 'https://rugbyresults.fusesport.com/api/rugby/main_detail/' . $season_id . '?competitionID=' . $competition_id;
+          // $url = 'https://rugbyresults.fusesport.com/api/rugby/main_detail/' . $season_id . '?competitionID=' . $competition_id;
+          $url = 'https://api.fusesport.com/comps/' . $competition_id . '/get/';
           $token = $requested_token['token'];
 
           $response = wp_remote_get($url, array(
-            'headers' => array(
-              'Authorization' => 'Bearer ' . $token,
-              'Accept'        => 'application/json',
-            ),
+            // 'headers' => array(
+            //   'Authorization' => 'Bearer ' . $token,
+            //   'Accept'        => 'application/json',
+            // ),
           ));
+
+
 
           if (is_wp_error($response)) {
             wp_send_json(array(
@@ -127,6 +130,7 @@ class Fusesport
             $body = wp_remote_retrieve_body($response);
             $data = json_decode($body, true);
             $fsa->sportspress->createEvents($data);
+            // error_log(print_r($data, true));
           }
         }
       }
