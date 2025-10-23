@@ -51,7 +51,10 @@ class Shortcode
     ob_start();
 
     $data = $this->get_fusesport_fixtures($atts['season_id'], $atts['competition_id']);
-
+    $test = wp_remote_get('https://api.fusesport.com/comps/' . $atts['competition_id'] . '/get/');
+    $body = wp_remote_retrieve_body($test);
+    $fixtures = json_decode($body, true);
+    // error_log(print_r($fixtures, true));
     require_once(FSA_VIEWS_ROOT_DIR . 'fusesports-fixtures.php');
 
     // content
@@ -73,7 +76,7 @@ class Shortcode
     $test = wp_remote_get('https://api.fusesport.com/comps/' . $atts['competition_id'] . '/ladder/');
     $body = wp_remote_retrieve_body($test);
     $ladder_data = json_decode($body, true);
-    error_log(print_r($ladder_data, true));
+
     require_once(FSA_VIEWS_ROOT_DIR . 'fusesports-ladders.php');
 
     // content
