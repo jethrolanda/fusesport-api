@@ -18,18 +18,19 @@
   </thead>
   <tbody>
     <?php
-    foreach ($data['ladder'] as $ladder) { ?>
+    // $data['ladder']
+    foreach ($ladder_data as $ladder) { ?>
       <tr class="withIcon">
         <td data-team="519239"><?php echo $ladder['team_name']; ?></td>
+        <td><?php echo $ladder['played']; ?></td>
+        <td><?php echo $ladder['wins']; ?></td>
+        <td><?php echo $ladder['draws']; ?></td>
+        <td><?php echo $ladder['losses']; ?></td>
         <td>&nbsp;</td>
         <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td><?php echo $ladder['points']; ?></td>
+        <td><?php echo $ladder['pointsdifference']; ?></td>
+        <td><?php echo $ladder['bonuspoints']; ?></td>
+        <td><?php echo $ladder['ladderpoints']; ?></td>
       </tr>
     <?php
     }

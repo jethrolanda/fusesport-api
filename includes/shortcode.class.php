@@ -70,8 +70,10 @@ class Shortcode
     ob_start();
 
     $data = $this->get_fusesport_ladders($atts['season_id'], $atts['competition_id']);
-
-    error_log(print_r($data, true));
+    $test = wp_remote_get('https://api.fusesport.com/comps/' . $atts['competition_id'] . '/ladder/');
+    $body = wp_remote_retrieve_body($test);
+    $ladder_data = json_decode($body, true);
+    error_log(print_r($ladder_data, true));
     require_once(FSA_VIEWS_ROOT_DIR . 'fusesports-ladders.php');
 
     // content
