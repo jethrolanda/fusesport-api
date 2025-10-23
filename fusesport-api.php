@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Plugin Name: Fuse Sport API
- * Description: Fuse Sport API
+ * Plugin Name: FuseSport API
+ * Description: FuseSport API
  * Version: 1.0
  * Author: Jethrolanda
  * Author URI: jethrolanda.com
